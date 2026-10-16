@@ -1,0 +1,7 @@
+L001|Black Wallet|Wallet|Leather wallet with college ID card|Library|2026-10-10|Aarav Patil|9876543210|OPEN
+L002|Blue Water Bottle|Other|Milton steel bottle blue|Canteen|2026-10-09|Neha Joshi|neha.joshi@example.com|OPEN
+L003|Casio Calculator|Electronics|fx-991 scientific calculator|Exam Hall|2026-10-11|Rohan Kale|9123456780|OPEN
+L004|House Keys|Keys|Keychain with red tag and two keys|Parking Area|2026-10-12|Priya Deshmukh|9988776655|OPEN
+L005|Grey Hoodie|Clothing|Grey hoodie with university logo|Main Auditorium|2026-10-08|Kunal Shah|kunal.shah@example.com|OPEN
+L006|Data Structures Book|Books|Data Structures textbook by Tanenbaum|Computer Lab|2026-10-13|Sneha Pawar|9090909090|OPEN
+L007|Mobile Phone|Electronics|Color : Blue, Brand : Samsung|in front of the sangam restraunt|2026-10-16|Yashkumar Meshram|8830225214|OPEN

@@ -1,0 +1,5 @@
+F001|Wallet|Wallet|Black leather wallet with ID card|Library 2nd Floor|2026-10-11|Security Desk|9000000001|OPEN
+F002|Calculator|Electronics|Casio scientific calculator fx-991|Exam Hall|2026-10-12|Mr. Kulkarni|9112233445|OPEN
+F003|Keys|Keys|Bunch of keys with red tag|Parking Area|2026-10-13|Amit Rane|amit.rane@example.com|OPEN
+F004|Red Umbrella|Other|Folding umbrella red colour|Canteen|2026-10-12|Sakshi More|9811122233|OPEN
+F005|Textbook|Books|Data Structures book Tanenbaum|Computer Lab|2026-10-14|Lab Assistant|9822334455|OPEN

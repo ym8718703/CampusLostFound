@@ -1,0 +1,43 @@
+==================================================
+      CAMPUS LOST & FOUND - MATCH REPORT
+==================================================
+Match Score : 100%
+LOST ITEM   : Casio Calculator [ID: L003]
+  Owner     : Rohan Kale (9123456780)
+  Location  : Exam Hall | Date: 2026-10-11
+FOUND ITEM  : Calculator [ID: F002]
+  Finder    : Mr. Kulkarni (9112233445)
+  Location  : Exam Hall | Date: 2026-10-12
+--------------------------------------------------
+Match Score : 100%
+LOST ITEM   : House Keys [ID: L004]
+  Owner     : Priya Deshmukh (9988776655)
+  Location  : Parking Area | Date: 2026-10-12
+FOUND ITEM  : Keys [ID: F003]
+  Finder    : Amit Rane (amit.rane@example.com)
+  Location  : Parking Area | Date: 2026-10-13
+--------------------------------------------------
+Match Score : 100%
+LOST ITEM   : Data Structures Book [ID: L006]
+  Owner     : Sneha Pawar (9090909090)
+  Location  : Computer Lab | Date: 2026-10-13
+FOUND ITEM  : Textbook [ID: F005]
+  Finder    : Lab Assistant (9822334455)
+  Location  : Computer Lab | Date: 2026-10-14
+--------------------------------------------------
+Match Score : 90%
+LOST ITEM   : Black Wallet [ID: L001]
+  Owner     : Aarav Patil (9876543210)
+  Location  : Library | Date: 2026-10-10
+FOUND ITEM  : Wallet [ID: F001]
+  Finder    : Security Desk (9000000001)
+  Location  : Library 2nd Floor | Date: 2026-10-11
+--------------------------------------------------
+Match Score : 70%
+LOST ITEM   : Blue Water Bottle [ID: L002]
+  Owner     : Neha Joshi (neha.joshi@example.com)
+  Location  : Canteen | Date: 2026-10-09
+FOUND ITEM  : Red Umbrella [ID: F004]
+  Finder    : Sakshi More (9811122233)
+  Location  : Canteen | Date: 2026-10-12
+--------------------------------------------------
