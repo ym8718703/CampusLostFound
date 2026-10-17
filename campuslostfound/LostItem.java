@@ -1,16 +1,13 @@
 package campuslostfound;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
- * Subclass representing an item reported as lost by a student/staff member.
+ * Subclass representing an item reported as lost by a student or staff member.
  *
  * Demonstrates Syllabus Concepts:
  * - Inheritance: Extends Item class using 'extends' and invokes super(...) constructor (Unit I, CO2)
  * - Interfaces: Implements Matchable interface (Unit I, CO2)
  * - Polymorphism: Overrides getType(), getPersonRole(), displayDetails(), and calculateMatchScore() (Unit I, CO2)
- * - Collections Framework: Uses HashSet to compute keyword intersection (Unit II, CO4)
+ * - String Processing: Simple string methods equalsIgnoreCase(), toLowerCase(), split(), contains() (Unit II, CO3)
  */
 public class LostItem extends Item implements Matchable {
 
@@ -49,12 +46,12 @@ public class LostItem extends Item implements Matchable {
     }
 
     /**
-     * Scores how well a found item matches this lost item (0 to 100 points).
+     * Matches this lost item against a found item using simple Java concepts:
+     * 1. Category comparison: String.equalsIgnoreCase() (40 points)
+     * 2. Name / Description comparison: String.toLowerCase(), split(" "), and contains() (30 points)
+     * 3. Location comparison: String.equalsIgnoreCase() or contains() (up to 30 points)
      *
-     * Scoring Criteria:
-     * 1. Category match: 40 points
-     * 2. Keyword match (from name/description): up to 30 points
-     * 3. Location match: up to 30 points
+     * Total score is out of 100 points.
      */
     @Override
     public int calculateMatchScore(Item other) {
@@ -65,41 +62,50 @@ public class LostItem extends Item implements Matchable {
         int score = 0;
 
         // 1. Category Match (40 points)
-        if (getCategory().equalsIgnoreCase(other.getCategory())) {
+        boolean sameCategory = getCategory().equalsIgnoreCase(other.getCategory());
+        if (sameCategory) {
             score += 40;
         }
 
-        // 2. Keyword Match (up to 30 points) using HashSet
-        Set<String> myKeywords = getKeywords();
-        Set<String> otherKeywords = other.getKeywords();
+        // 2. Name / Description Word Match (30 points)
+        // Uses simple String methods: toLowerCase(), split(" "), and contains()
+        String myName = getName().toLowerCase();
+        String otherText = (other.getName() + " " + other.getDescription()).toLowerCase();
 
-        int commonCount = 0;
-        for (String word : myKeywords) {
-            if (otherKeywords.contains(word)) {
-                commonCount++;
+        boolean nameMatched = false;
+
+        // Check if full item name appears in the other item
+        if (otherText.contains(myName) || myName.contains(other.getName().toLowerCase())) {
+            nameMatched = true;
+        } else {
+            // Check individual words from the item name
+            String[] words = myName.split(" ");
+            for (int i = 0; i < words.length; i++) {
+                String word = words[i].trim();
+                // Check if word has meaningful length (at least 3 characters)
+                if (word.length() >= 3 && otherText.contains(word)) {
+                    nameMatched = true;
+                    break;
+                }
             }
         }
 
-        if (commonCount > 0) {
-            if (commonCount >= 2) {
-                score += 30;
-            } else {
-                score += 20;
-            }
+        if (nameMatched) {
+            score += 30;
         }
 
         // 3. Location Match (up to 30 points)
         String myLoc = getLocation().toLowerCase();
         String otherLoc = other.getLocation().toLowerCase();
-        if (myLoc.equals(otherLoc)) {
-            score += 30;
+        if (myLoc.equalsIgnoreCase(otherLoc)) {
+            score += 30; // Exact location match
         } else if (myLoc.contains(otherLoc) || otherLoc.contains(myLoc)) {
-            score += 20;
+            score += 20; // Partial location match (e.g. "Library" vs "Library 2nd Floor")
         }
 
-        // Safety rule: if there are zero keywords in common and categories differ,
-        // do not mark as a match.
-        if (commonCount == 0 && !getCategory().equalsIgnoreCase(other.getCategory())) {
+        // Safety rule: Two items must share at least one name or description word
+        // (An umbrella and a bottle in the same room should not match)
+        if (!nameMatched) {
             return 0;
         }
 

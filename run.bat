@@ -3,7 +3,7 @@ title Campus Lost and Found System
 cls
 echo =============================================================
 echo    Campus Lost and Found Management System
-echo    Skill Development Lab-I (Pattern 2025-26)
+echo    Skill Development Lab-I
 echo =============================================================
 echo Compiling Java source files...
 javac campuslostfound/*.java

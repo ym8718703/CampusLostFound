@@ -1,8 +1,5 @@
 package campuslostfound;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Abstract Base Class representing a campus lost or found item.
  *
@@ -12,33 +9,12 @@ import java.util.Set;
  * - Polymorphism: Method Overloading and Method Overriding (Unit I, CO2)
  * - String Processing: Standard string functions length(), trim(), toLowerCase(), split(), indexOf() (Unit II, CO3)
  * - Exception Handling: Throws user-defined InvalidItemException on validation failure (Unit II, CO3)
- * - Collections Framework: HashSet used to store unique stop words and item keywords (Unit II, CO4)
  */
 public abstract class Item implements Storable {
 
     // Status Constants
     public static final String STATUS_OPEN = "OPEN";
     public static final String STATUS_RETURNED = "RETURNED";
-
-    // Set of common filler words ignored during keyword extraction (HashSet demo)
-    private static final Set<String> STOP_WORDS = new HashSet<>();
-
-    static {
-        STOP_WORDS.add("the");
-        STOP_WORDS.add("and");
-        STOP_WORDS.add("with");
-        STOP_WORDS.add("for");
-        STOP_WORDS.add("has");
-        STOP_WORDS.add("have");
-        STOP_WORDS.add("was");
-        STOP_WORDS.add("were");
-        STOP_WORDS.add("near");
-        STOP_WORDS.add("from");
-        STOP_WORDS.add("this");
-        STOP_WORDS.add("that");
-        STOP_WORDS.add("some");
-        STOP_WORDS.add("item");
-    }
 
     // Encapsulated Fields (Private access modifier)
     private String id;
@@ -206,25 +182,6 @@ public abstract class Item implements Storable {
             throw new InvalidItemException("Status must be OPEN or RETURNED.");
         }
         this.status = status.toUpperCase();
-    }
-
-    /**
-     * Extracts unique alphanumeric keywords using String methods and HashSet.
-     * Demonstrates Collections (HashSet) & String handling.
-     */
-    public Set<String> getKeywords() {
-        Set<String> keywords = new HashSet<>();
-        String combined = (name + " " + description).toLowerCase();
-
-        // Split by spaces and common punctuation
-        String[] tokens = combined.split("[ ,;:.!?()/\"]+");
-        for (int i = 0; i < tokens.length; i++) {
-            String word = tokens[i].trim();
-            if (word.length() > 2 && !STOP_WORDS.contains(word)) {
-                keywords.add(word);
-            }
-        }
-        return keywords;
     }
 
     /**

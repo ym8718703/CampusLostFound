@@ -1,560 +1,331 @@
+"""
+Simple Report Generator for Campus Lost & Found System
+Uses standard python-docx library to create the project report document (.docx).
+Clean, readable, and easy to understand without any complex XML manipulation.
+"""
+
 import os
 import docx
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
-from docx.oxml import OxmlElement, parse_xml
-from docx.oxml.ns import nsdecls, qn
 
-def create_report():
+def build_report():
+    # 1. Initialize Document
     doc = docx.Document()
 
-    # Page Margins: 1 inch on all sides
+    # Set 1-inch margins
     for section in doc.sections:
         section.top_margin = Inches(1.0)
         section.bottom_margin = Inches(1.0)
         section.left_margin = Inches(1.0)
         section.right_margin = Inches(1.0)
-        section.different_first_page_header_footer = True
-        
-        # Header / Footer
-        header = section.header
-        hp = header.paragraphs[0]
-        hp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-        hrun = hp.add_run("CB2206L: Skill Development Lab-I | Mini Project Report")
-        hrun.font.name = "Arial"
-        hrun.font.size = Pt(8.5)
-        hrun.font.color.rgb = RGBColor(128, 128, 128)
 
-        footer = section.footer
-        fp = footer.paragraphs[0]
-        fp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        frun = fp.add_run("JSPM's Rajarshi Shahu College of Engineering, Pune - Department of CSBS")
-        frun.font.name = "Arial"
-        frun.font.size = Pt(8.5)
-        frun.font.color.rgb = RGBColor(128, 128, 128)
-
-    # Palette
-    COLOR_PRIMARY = RGBColor(26, 54, 93)     # Deep Navy
-    COLOR_SECONDARY = RGBColor(43, 108, 176) # Slate Blue
-    COLOR_DARK = RGBColor(45, 55, 72)        # Charcoal Text
-    COLOR_MUTED = RGBColor(113, 128, 150)    # Cool Gray
-
-    # Style Helpers
-    def set_cell_background(cell, fill_hex):
-        tcPr = cell._tc.get_or_add_tcPr()
-        shd = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{fill_hex}"/>')
-        tcPr.append(shd)
-
-    def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
-        tcPr = cell._tc.get_or_add_tcPr()
-        tcMar = parse_xml(
-            f'<w:tcMar {nsdecls("w")}>'
-            f'<w:top w:w="{top}" w:type="dxa"/>'
-            f'<w:bottom w:w="{bottom}" w:type="dxa"/>'
-            f'<w:left w:w="{left}" w:type="dxa"/>'
-            f'<w:right w:w="{right}" w:type="dxa"/>'
-            f'</w:tcMar>'
-        )
-        tcPr.append(tcMar)
-
+    # -------------------------------------------------------------
+    # Helper Functions for Clean Document Formatting
+    # -------------------------------------------------------------
     def add_title(text):
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p.paragraph_format.space_before = Pt(12)
-        p.paragraph_format.space_after = Pt(4)
         run = p.add_run(text)
         run.font.name = "Arial"
-        run.font.size = Pt(22)
+        run.font.size = Pt(20)
         run.font.bold = True
-        run.font.color.rgb = COLOR_PRIMARY
-        return p
+        run.font.color.rgb = RGBColor(26, 54, 93) # Deep Blue
 
     def add_subtitle(text):
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p.paragraph_format.space_before = Pt(2)
-        p.paragraph_format.space_after = Pt(18)
         run = p.add_run(text)
         run.font.name = "Arial"
-        run.font.size = Pt(12)
-        run.font.color.rgb = COLOR_MUTED
-        return p
+        run.font.size = Pt(11)
+        run.font.italic = True
+        run.font.color.rgb = RGBColor(100, 100, 100)
 
     def add_heading1(text):
         p = doc.add_paragraph()
-        p.paragraph_format.space_before = Pt(16)
-        p.paragraph_format.space_after = Pt(6)
-        p.paragraph_format.keep_with_next = True
+        p.paragraph_format.space_before = Pt(14)
+        p.paragraph_format.space_after = Pt(4)
         run = p.add_run(text)
         run.font.name = "Arial"
-        run.font.size = Pt(15)
+        run.font.size = Pt(14)
         run.font.bold = True
-        run.font.color.rgb = COLOR_PRIMARY
-        return p
+        run.font.color.rgb = RGBColor(26, 54, 93)
 
     def add_heading2(text):
         p = doc.add_paragraph()
-        p.paragraph_format.space_before = Pt(12)
-        p.paragraph_format.space_after = Pt(4)
-        p.paragraph_format.keep_with_next = True
+        p.paragraph_format.space_before = Pt(10)
+        p.paragraph_format.space_after = Pt(3)
         run = p.add_run(text)
         run.font.name = "Arial"
-        run.font.size = Pt(12.5)
+        run.font.size = Pt(12)
         run.font.bold = True
-        run.font.color.rgb = COLOR_SECONDARY
-        return p
+        run.font.color.rgb = RGBColor(43, 108, 176)
 
     def add_heading3(text):
         p = doc.add_paragraph()
         p.paragraph_format.space_before = Pt(8)
         p.paragraph_format.space_after = Pt(2)
-        p.paragraph_format.keep_with_next = True
         run = p.add_run(text)
         run.font.name = "Arial"
-        run.font.size = Pt(11)
+        run.font.size = Pt(10.5)
         run.font.bold = True
-        run.font.color.rgb = COLOR_DARK
-        return p
 
-    def add_p(text="", bold_prefix=None):
+    def add_p(text, bold_prefix=None):
         p = doc.add_paragraph()
-        p.paragraph_format.space_before = Pt(0)
-        p.paragraph_format.space_after = Pt(5)
+        p.paragraph_format.space_after = Pt(4)
         p.paragraph_format.line_spacing = 1.15
-        if bold_prefix:
-            r_pre = p.add_run(bold_prefix)
-            r_pre.font.name = "Arial"
-            r_pre.font.size = Pt(10.5)
-            r_pre.font.bold = True
-            r_pre.font.color.rgb = COLOR_DARK
-        if text:
-            r = p.add_run(text)
-            r.font.name = "Arial"
-            r.font.size = Pt(10.5)
-            r.font.color.rgb = COLOR_DARK
-        return p
-
-    def add_bullet(text, bold_prefix=None, level=0):
-        p = doc.add_paragraph(style='List Bullet')
-        p.paragraph_format.space_before = Pt(1)
-        p.paragraph_format.space_after = Pt(3)
-        p.paragraph_format.line_spacing = 1.15
-        p.paragraph_format.left_indent = Inches(0.25 * (level + 1))
         if bold_prefix:
             r_pre = p.add_run(bold_prefix)
             r_pre.font.name = "Arial"
             r_pre.font.size = Pt(10)
             r_pre.font.bold = True
-            r_pre.font.color.rgb = COLOR_DARK
-        if text:
-            r = p.add_run(text)
-            r.font.name = "Arial"
-            r.font.size = Pt(10)
-            r.font.color.rgb = COLOR_DARK
-        return p
+        r = p.add_run(text)
+        r.font.name = "Arial"
+        r.font.size = Pt(10)
 
-    def add_code_box(code_text):
-        tbl = doc.add_table(rows=1, cols=1)
-        tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
-        tbl.autofit = False
-        tbl.columns[0].width = Inches(6.5)
-        cell = tbl.cell(0, 0)
-        set_cell_background(cell, "F7FAFC")
-        set_cell_margins(cell, top=120, bottom=120, left=180, right=180)
-        
-        # Border
-        tcPr = cell._tc.get_or_add_tcPr()
-        borders = parse_xml(
-            f'<w:tcBorders {nsdecls("w")}>'
-            f'<w:top w:val="single" w:sz="4" w:space="0" w:color="CBD5E0"/>'
-            f'<w:left w:val="single" w:sz="18" w:space="0" w:color="2B6CB0"/>'
-            f'<w:bottom w:val="single" w:sz="4" w:space="0" w:color="CBD5E0"/>'
-            f'<w:right w:val="single" w:sz="4" w:space="0" w:color="CBD5E0"/>'
-            f'</w:tcBorders>'
-        )
-        tcPr.append(borders)
+    def add_bullet(text, bold_prefix=None):
+        p = doc.add_paragraph(style='List Bullet')
+        p.paragraph_format.space_after = Pt(2)
+        p.paragraph_format.line_spacing = 1.15
+        if bold_prefix:
+            r_pre = p.add_run(bold_prefix)
+            r_pre.font.name = "Arial"
+            r_pre.font.size = Pt(10)
+            r_pre.font.bold = True
+        r = p.add_run(text)
+        r.font.name = "Arial"
+        r.font.size = Pt(10)
 
-        cp = cell.paragraphs[0]
-        cp.paragraph_format.space_before = Pt(2)
-        cp.paragraph_format.space_after = Pt(2)
-        cp.paragraph_format.line_spacing = 1.05
-        crun = cp.add_run(code_text)
-        crun.font.name = "Consolas"
-        crun.font.size = Pt(8.5)
-        crun.font.color.rgb = RGBColor(45, 55, 72)
-        
-        p_after = doc.add_paragraph()
-        p_after.paragraph_format.space_before = Pt(0)
-        p_after.paragraph_format.space_after = Pt(4)
+    def add_table(headers, rows):
+        """Creates a clean, styled table using built-in Word Table Grid"""
+        table = doc.add_table(rows=len(rows) + 1, cols=len(headers))
+        table.style = 'Table Grid'
+        table.autofit = True
 
-    def add_custom_table(col_widths, headers, data):
-        table = doc.add_table(rows=len(data) + 1, cols=len(headers))
-        table.alignment = WD_TABLE_ALIGNMENT.CENTER
-        table.autofit = False
-
-        # Header Row
-        hdr_cells = table.rows[0].cells
-        for i, h in enumerate(headers):
-            hdr_cells[i].text = h
-            hdr_cells[i].width = col_widths[i]
-            set_cell_background(hdr_cells[i], "1A365D")
-            set_cell_margins(hdr_cells[i], top=120, bottom=120, left=140, right=140)
-            hp = hdr_cells[i].paragraphs[0]
-            hp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            for run in hp.runs:
-                run.font.name = "Arial"
-                run.font.size = Pt(9.5)
-                run.font.bold = True
-                run.font.color.rgb = RGBColor(255, 255, 255)
-
-        # Data Rows
-        for r_idx, row_data in enumerate(data):
-            row_cells = table.rows[r_idx + 1].cells
-            bg_color = "F7FAFC" if (r_idx % 2 == 1) else "FFFFFF"
-            for c_idx, val in enumerate(row_data):
-                row_cells[c_idx].text = str(val)
-                row_cells[c_idx].width = col_widths[c_idx]
-                set_cell_background(row_cells[c_idx], bg_color)
-                set_cell_margins(row_cells[c_idx], top=80, bottom=80, left=120, right=120)
-                p = row_cells[c_idx].paragraphs[0]
+        # Header row
+        for col_idx, header_text in enumerate(headers):
+            cell = table.cell(0, col_idx)
+            cell.text = header_text
+            for p in cell.paragraphs:
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
                 for run in p.runs:
                     run.font.name = "Arial"
-                    run.font.size = Pt(9)
-                    run.font.color.rgb = COLOR_DARK
+                    run.font.size = Pt(9.5)
+                    run.font.bold = True
 
-        # Thin grid borders
-        tblPr = table._tbl.tblPr
-        borders = parse_xml(
-            f'<w:tblBorders {nsdecls("w")}>'
-            f'<w:top w:val="single" w:sz="4" w:space="0" w:color="CBD5E0"/>'
-            f'<w:left w:val="none"/>'
-            f'<w:bottom w:val="single" w:sz="6" w:space="0" w:color="1A365D"/>'
-            f'<w:right w:val="none"/>'
-            f'<w:insideH w:val="single" w:sz="4" w:space="0" w:color="E2E8F0"/>'
-            f'<w:insideV w:val="none"/>'
-            f'</w:tblBorders>'
-        )
-        tblPr.append(borders)
+        # Data rows
+        for row_idx, row_data in enumerate(rows):
+            for col_idx, cell_value in enumerate(row_data):
+                cell = table.cell(row_idx + 1, col_idx)
+                cell.text = str(cell_value)
+                for p in cell.paragraphs:
+                    for run in p.runs:
+                        run.font.name = "Arial"
+                        run.font.size = Pt(9)
 
-        p_after = doc.add_paragraph()
-        p_after.paragraph_format.space_before = Pt(0)
-        p_after.paragraph_format.space_after = Pt(6)
-        return table
+        doc.add_paragraph().paragraph_format.space_after = Pt(4)
+
+    def add_code(code_text):
+        """Adds code snippet in monospaced font"""
+        p = doc.add_paragraph()
+        p.paragraph_format.space_before = Pt(2)
+        p.paragraph_format.space_after = Pt(4)
+        run = p.add_run(code_text)
+        run.font.name = "Consolas"
+        run.font.size = Pt(8.5)
+        run.font.color.rgb = RGBColor(30, 30, 30)
 
     # -------------------------------------------------------------
-    # DOCUMENT CONTENT GENERATION
+    # DOCUMENT CONTENT
     # -------------------------------------------------------------
 
-    # Cover / Header Information
+    # College Header
     p_inst = doc.add_paragraph()
     p_inst.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r_inst = p_inst.add_run("JSPM's Rajarshi Shahu College of Engineering, Tathawade, Pune - 411033\n"
                             "(An Autonomous Institute Affiliated to Savitribai Phule Pune University)\n"
                             "Department of Computer Science and Business Systems\n"
-                            "Academic Year 2025-26 | Semester III\n")
+                            "CB2206L: Skill Development Lab-I (Pattern 2025-26) | Semester III\n")
     r_inst.font.name = "Arial"
     r_inst.font.size = Pt(10)
     r_inst.font.bold = True
-    r_inst.font.color.rgb = COLOR_SECONDARY
+    r_inst.font.color.rgb = RGBColor(43, 108, 176)
 
     add_title("Mini Project Report\nCampus Lost & Found Management System")
-    add_subtitle("Course: CB2206L - Skill Development Lab-I\nMapped Course Outcomes: CO2 (OOP), CO3 (Strings & Exceptions), CO4 (Collections & Multithreading)")
+    add_subtitle("A Syllabus-Aligned Core Java Application (CO2: OOP | CO3: Strings & Exceptions | CO4: Collections & Multithreading)")
 
-    # Group Details Table
-    meta_headers = ["Sr. No.", "Student Name", "PRN No."]
-    meta_data = [
+    # Group Members Table
+    add_table(["Sr. No.", "Student Name", "PRN Number"], [
         ["1.", "[Student Name 1]", "[PRN No. 1]"],
         ["2.", "[Student Name 2]", "[PRN No. 2]"],
         ["3.", "[Student Name 3]", "[PRN No. 3]"],
         ["4.", "[Student Name 4]", "[PRN No. 4]"]
-    ]
-    add_custom_table([Inches(1.0), Inches(3.2), Inches(2.3)], meta_headers, meta_data)
+    ])
 
-    # Section 1: Title of Project
+    # Section 1
     add_heading1("1. Title of the Project")
     add_p("Campus Lost & Found Management System", bold_prefix="Project Title: ")
-    add_p("A modular Core Java application providing both an interactive menu-driven Console interface and an optional desktop Graphical User Interface (GUI) to report lost and found items on campus, persist records in file storage, perform overloaded search operations, execute background multi-threaded auto-matching with synchronization, and match found items with reported lost items using a syllabus-compliant scoring mechanism.")
+    add_p("A modular Core Java application providing both an interactive menu-driven Console interface and a Java Swing Graphical User Interface (GUI) to report lost and found items on campus, persist records in text files, search items using overloaded methods, execute concurrent background matching with thread synchronization, and match found items with reported lost items using simple Java concepts.")
 
-    # Section 2: Problem Statement
+    # Section 2
     add_heading1("2. Problem Statement")
-    add_p("On a busy university campus, students and staff frequently misplace everyday personal belongings such as student ID cards, wallets, calculators, notebooks, textbooks, keys, clothing, and water bottles. Currently, lost and found reports are handled informally across handwritten register notices, WhatsApp groups, or direct enquiries at campus security desks. This informal workflow exhibits severe operational limitations:")
-    add_bullet("Fragmented and unorganized records with no centralized repository to track reported items.", bold_prefix="Lack of Centralization: ")
-    add_bullet("Vital identifying details such as location of loss/discovery, timestamp, unique markings, and contact numbers are often omitted.", bold_prefix="Incomplete Metadata: ")
-    add_bullet("Claiming relies solely on human memory or manual comparison of messages, resulting in dozens of valuable unclaimed items remaining in store rooms.", bold_prefix="Manual Matching Overhead: ")
-    add_bullet("No formal status tracking exists to record whether an item has been successfully claimed and returned to its rightful owner.", bold_prefix="Absence of Audit Trail: ")
-    add_p("To resolve these challenges, there is a clear academic and practical need for a structured Core Java application that formalizes reporting, provides strict input validation and checked exception handling, persists records to persistent text files, and uses object-oriented algorithms and background multithreading to automatically match lost reports with found articles.")
+    add_p("On a university campus, students and staff frequently misplace personal belongings such as student ID cards, wallets, calculators, notebooks, keys, clothing, and water bottles. Traditionally, lost and found reports are handled informally through handwritten register notices, WhatsApp messages, or verbal enquiries at the security desk. This informal workflow exhibits several drawbacks:")
+    add_bullet("No single, organized repository exists to track what has been lost and found.", bold_prefix="Lack of Centralization: ")
+    add_bullet("Important details such as location of loss/discovery, timestamp, item description, and contact info are often incomplete.", bold_prefix="Incomplete Information: ")
+    add_bullet("Matching relies entirely on manual comparison or memory, leaving many items unclaimed.", bold_prefix="Manual Overhead: ")
+    add_bullet("No formal status tracking exists to confirm whether an item was claimed and returned.", bold_prefix="No Claim History: ")
+    add_p("To solve this problem, a simple and robust Core Java application was developed to allow structured reporting, persistent file storage, input validation, and automatic matching between lost and found items.")
 
-    # Section 3: Objectives
+    # Section 3
     add_heading1("3. Objectives")
-    add_p("The primary objective of this mini-project is to design, implement, and validate a syllabus-compliant Core Java solution—the Campus Lost & Found Management System—strictly aligned with the Skill Development Lab-I (CB2206L) curriculum. The concrete objectives are:")
-    add_bullet("Apply Object-Oriented Programming (CO2) including encapsulation, inheritance, abstract classes, interfaces, user-defined packages, access modifiers, method overloading, and method overriding.", bold_prefix="OOP Principles (CO2): ")
-    add_bullet("Implement robust String Processing and Exception Handling (CO3) using standard Java String methods (validating contact numbers and dates) and user-defined checked exceptions (InvalidItemException, ItemNotFoundException).", bold_prefix="Strings & Exceptions (CO3): ")
-    add_bullet("Utilize the Java Collections Framework (CO4) using ArrayList for inventory management, HashMap for O(1) item ID retrieval, HashSet for unique categories and keyword filtering, and Collections.sort() with Comparable for match ranking.", bold_prefix="Collections Framework (CO4): ")
-    add_bullet("Implement Multithreading and Thread Synchronization (CO4, Exp 5) by developing a background worker thread (AutoMatchThread extending Thread) that safely acquires locks on shared inventory resources to scan and export match reports.", bold_prefix="Multithreading & Synchronization: ")
-    add_bullet("Provide a dual-interface architecture featuring a primary menu-driven Console interface (via java.util.Scanner) for clean lab demonstration and an optional simplified Swing desktop GUI.", bold_prefix="Dual User Interface: ")
-    add_bullet("Achieve File Persistence using standard Core Java I/O streams (BufferedReader, BufferedWriter, PrintWriter) to guarantee data survivability across sessions.", bold_prefix="File Handling: ")
-    add_bullet("Strictly adhere to the syllabus by eliminating out-of-syllabus Java 8+ features (such as java.time.LocalDate, ChronoUnit, Lambda expressions, Streams, and complex regex patterns) to ensure 100% academic compliance.", bold_prefix="Syllabus Strictness: ")
+    add_p("The project is strictly designed around the CB2206L Course Outcomes (COs):")
+    add_bullet("Apply Object-Oriented Programming (CO2) using classes, objects, parameterized constructors, inheritance, user-defined packages, access modifiers, abstraction (abstract classes & interfaces), method overloading, and method overriding.", bold_prefix="CO2 (OOP Concepts): ")
+    add_bullet("Implement String Processing and Exception Handling (CO3) using standard Java String methods (validating contact and dates) and user-defined checked exceptions (InvalidItemException, ItemNotFoundException).", bold_prefix="CO3 (Strings & Exceptions): ")
+    add_bullet("Utilize the Java Collections Framework (CO4) using ArrayList for storing items, HashMap for fast O(1) item ID retrieval, and HashSet for collecting unique categories.", bold_prefix="CO4 (Collections Framework): ")
+    add_bullet("Implement Multithreading and Thread Synchronization (CO4, Exp 5) by developing a background worker thread (AutoMatchThread extending Thread) that safely synchronizes on shared inventory to scan and export match reports.", bold_prefix="CO4 (Multithreading & Sync): ")
+    add_bullet("Provide a dual-interface system: a primary menu-driven Console interface (via Scanner) for standard lab viva and an optional Swing desktop GUI.", bold_prefix="User Interface: ")
+    add_bullet("Ensure File Persistence using standard Core Java I/O (BufferedReader, BufferedWriter, PrintWriter) without external databases.", bold_prefix="File Handling: ")
+    add_bullet("Maintain strict syllabus alignment by replacing complex or out-of-syllabus features (LocalDate, ChronoUnit, Lambdas, Streams, complex regex) with simple, standard Core Java constructs.", bold_prefix="Syllabus Strictness: ")
 
-    # Section 4: Methodology
+    # Section 4
     add_heading1("4. Methodology")
-    add_p("The project was engineered using a structured, modular software development methodology:")
-    add_bullet("Requirements Analysis & Domain Modeling: Identified two core domain entities (LostItem and FoundItem) sharing identical metadata but having distinct business roles (Owner vs. Finder).", level=0)
-    add_bullet("Layered Architecture Design: Segregated responsibilities into Presentation (Console/GUI), Business Logic (ItemManager, AutoMatchThread), Model (Item hierarchy, interfaces, MatchResult), Persistence (FileManager), and Custom Exceptions.", level=0)
-    add_bullet("Syllabus Alignment & Package Organization: Grouped all related components under a user-defined package named campuslostfound to satisfy CO2 requirements.", level=0)
-    add_bullet("Deterministic Matching Algorithm: Developed a transparent, integer-based scoring rule (0 to 100 points) evaluating category equality, keyword set intersection using HashSet, and location proximity.", level=0)
-    add_bullet("Thread Safety & Concurrency: Built an asynchronous thread using synchronized blocks to prevent data races between concurrent matching and inventory modification.", level=0)
-    add_bullet("Rigorous Test Execution: Validated the application through 14 comprehensive test cases covering positive flows, invalid inputs, edge cases, and background synchronization.", level=0)
-
     add_heading2("4.1 Workflow of the System")
-    add_p("When the system starts, FileManager reads data/lost_items.txt and data/found_items.txt, restoring records into memory. Users navigate via a menu-driven loop in Main.java or the optional GUI in MainFrame.java. The detailed step-by-step workflow is structured as follows:")
-    add_bullet("Step 1 (Initialization): FileManager verifies the data directory and loads existing records into an ArrayList<LostItem>, ArrayList<FoundItem>, and a Map<String, Item> index.", level=0)
-    add_bullet("Step 2 (Report Submission & Validation): The user submits a report. All fields are passed through validated setters. If validation fails, an InvalidItemException is thrown and caught with a descriptive message. Upon success, an auto-incremented ID (e.g. L001, F001) is assigned.", level=0)
-    add_bullet("Step 3 (Immediate Match Alert): When a new report is added, the system immediately invokes findMatchesFor() to check if reciprocal open items match with score >= 50% and alerts the user.", level=0)
-    add_bullet("Step 4 (Overloaded Search): Users can search items using two overloaded methods: search(keyword) or search(keyword, category).", level=0)
-    add_bullet("Step 5 (Claim Confirmation): When an owner retrieves their property, confirmMatch() sets the status of both lost and found records to RETURNED and updates persistent storage.", level=0)
-    add_bullet("Step 6 (Multithreaded Background Sync): Users can spawn AutoMatchThread (extending Thread), which locks ItemManager via synchronized, computes matches, and exports data/match_report.txt asynchronously.", level=0)
+    add_p("When the system starts, FileManager reads data/lost_items.txt and data/found_items.txt, restoring records into memory. The user interacts through the console menu (Main.java) or the Swing GUI (MainFrame.java):")
+    add_bullet("Step 1 (Load Records): The system loads saved records into an ArrayList<LostItem>, ArrayList<FoundItem>, and a HashMap<String, Item> index.", bold_prefix="1. Initialization: ")
+    add_bullet("Step 2 (Report Item & Validate): The user inputs item details. Validated setters check the inputs. If invalid, an InvalidItemException is thrown and caught with a clear error message. If valid, an ID (e.g. L001, F001) is assigned.", bold_prefix="2. Input Validation: ")
+    add_bullet("Step 3 (Immediate Match Alert): The system checks if the new item matches any existing opposite item and alerts the user.", bold_prefix="3. Match Check: ")
+    add_bullet("Step 4 (Overloaded Search): Users can search items using two overloaded methods: search(keyword) or search(keyword, category).", bold_prefix="4. Search: ")
+    add_bullet("Step 5 (Claim Confirmation): When an item is returned, confirmMatch() sets the status of both lost and found records to RETURNED and saves to file.", bold_prefix="5. Return Item: ")
+    add_bullet("Step 6 (Multithreaded Background Sync): Users can start AutoMatchThread (extends Thread), which synchronizes on ItemManager, computes matches, and exports data/match_report.txt in the background.", bold_prefix="6. Multithreading: ")
 
-    add_heading2("4.2 Matching Algorithm & Scoring Rules")
-    add_p("Every open LostItem is compared against every open FoundItem. The match confidence score is computed as an integer value out of 100 based on the deterministic criteria detailed in Table 4.1.")
+    add_heading2("4.2 Matching Algorithm Using Simple Java Concepts")
+    add_p("Matching between lost items and found items is implemented in LostItem.java using simple, standard Java String concepts (equalsIgnoreCase, toLowerCase, split, and contains):")
+    add_table(["Criterion", "Simple Java Implementation", "Points Awarded"], [
+        ["Category Match", "Compares categories using String.equalsIgnoreCase()", "40 Points"],
+        ["Name / Description Word Match", "Splits the item name by space using split(' '). Checks if any meaningful word (length >= 3) appears in the other item using String.contains().", "30 Points"],
+        ["Location Match", "Checks if locations match using equalsIgnoreCase() or contains(). Exact match gives 30 points; partial match gives 20 points.", "Up to 30 Points"],
+        ["Safety Rule", "If no name or description word matches, the score is 0. Total score is 0 to 100. Any pair with score >= 50% is reported as a match.", "Threshold: 50%"]
+    ])
 
-    tbl_score_headers = ["Criterion", "Evaluation Logic", "Score Allocated"]
-    tbl_score_data = [
-        ["Category Match", "Case-insensitive equality comparison (equalsIgnoreCase) between lost and found category", "40 Points"],
-        ["Keyword Overlap", "Extraction of meaningful tokens into HashSet; intersection count using HashSet.contains():\\n- 2 or more shared keywords: 30 pts\\n- 1 shared keyword: 20 pts", "Up to 30 Points"],
-        ["Location Match", "Evaluation using String.toLowerCase(), equals(), and contains():\\n- Exact location equality: 30 pts\\n- Substring match (e.g., 'Library' vs 'Library 2nd Floor'): 20 pts", "Up to 30 Points"],
-        ["Total / Safety Rule", "Maximum possible score = 100 points.\\nThreshold constant MATCH_THRESHOLD = 50%.\\nSafety rule: If categories differ and zero keywords match, score is capped at 0.", "100 Points (Threshold: 50%)"]
-    ]
-    add_custom_table([Inches(1.8), Inches(3.4), Inches(1.3)], tbl_score_headers, tbl_score_data)
-
-    # Section 5: Dataset & Technologies
+    # Section 5
     add_heading1("5. Dataset, Tools & Technologies Used")
     add_heading2("5.1 Dataset & File Storage")
-    add_p("The application maintains its own autonomous data store in the data/ directory using standard pipe-separated (|) text files:")
-    add_bullet("data/lost_items.txt: Stores all reported lost item records.", bold_prefix="Lost Items Store: ")
-    add_bullet("data/found_items.txt: Stores all reported found item records.", bold_prefix="Found Items Store: ")
-    add_bullet("data/match_report.txt: Stores formatted export reports generated manually or by the background worker thread.", bold_prefix="Match Report Store: ")
+    add_p("The project uses plain text files stored inside the data/ folder:")
+    add_bullet("data/lost_items.txt: Stores all lost item records.", bold_prefix="Lost Items: ")
+    add_bullet("data/found_items.txt: Stores all found item records.", bold_prefix="Found Items: ")
+    add_bullet("data/match_report.txt: Stores the exported match report.", bold_prefix="Match Report: ")
+    add_p("Each line contains nine fields separated by the pipe character (|):\n"
+          "Example: L001|Black Wallet|Wallet|Leather wallet with college ID card|Library|2026-10-10|Aarav Patil|9876543210|OPEN")
 
-    add_p("Each line represents a single item record composed of exactly nine pipe-separated tokens, as specified in Table 5.1:")
-    add_p("Sample Record: L001|Black Wallet|Wallet|Leather wallet with college ID card|Library|2026-10-10|Aarav Patil|9876543210|OPEN", bold_prefix="Example Format: ")
-
-    tbl_fields_headers = ["Field Index / Name", "Description & Type", "Validation Rule & Constraint"]
-    tbl_fields_data = [
-        ["f[0] : id", "Unique identifier (String)", "Auto-generated format: 'L001', 'L002' for lost; 'F001', 'F002' for found."],
-        ["f[1] : name", "Item Name (String)", "Mandatory non-empty string. Validated via trim().length() > 0."],
-        ["f[2] : category", "Category Classification (String)", "Mandatory classification (e.g., Electronics, Wallet, Books, Keys)."],
-        ["f[3] : description", "Detailed Attributes (String)", "Optional description (color, brand, distinguishing marks)."],
-        ["f[4] : location", "Location of Loss/Find (String)", "Mandatory non-empty campus location."],
-        ["f[5] : date", "Date of Occurrence (String)", "Mandatory YYYY-MM-DD format parsed via split('-') and Integer.parseInt()."],
-        ["f[6] : personName", "Reporter Name (String)", "Mandatory owner or finder name."],
-        ["f[7] : personContact", "Contact Information (String)", "Must be a 10-digit numeric phone number or an email containing '@' and '.'."],
-        ["f[8] : status", "Record Status (String)", "Restricted to constants: 'OPEN' or 'RETURNED'."]
-    ]
-    add_custom_table([Inches(1.8), Inches(2.2), Inches(2.5)], tbl_fields_headers, tbl_fields_data)
+    add_table(["Field Index & Name", "Description", "Simple Validation Rule"], [
+        ["f[0] : id", "Unique ID (String)", "Auto-generated: L001, L002... or F001, F002..."],
+        ["f[1] : name", "Item Name (String)", "Non-empty string; validated using trim().length() > 0."],
+        ["f[2] : category", "Category (String)", "Electronics, Wallet, Books, ID Card, Keys, Clothing, Other."],
+        ["f[3] : description", "Description (String)", "Optional details (color, brand, marks)."],
+        ["f[4] : location", "Location (String)", "Non-empty string."],
+        ["f[5] : date", "Date (String: YYYY-MM-DD)", "Validated by splitting with '-' and Integer.parseInt()."],
+        ["f[6] : personName", "Owner / Finder Name (String)", "Non-empty string."],
+        ["f[7] : personContact", "Contact Info (String)", "10-digit number (all digits) or email containing '@' and '.'."],
+        ["f[8] : status", "Status (String)", "Must be 'OPEN' or 'RETURNED'."]
+    ])
 
     add_heading2("5.2 Tools & Technologies")
-    tbl_tools_headers = ["Component / Layer", "Tool / Technology Employed"]
-    tbl_tools_data = [
-        ["Programming Language", "Java Standard Edition (JDK 8 / 11 / 17 / 21)"],
-        ["Package Organization", "User-defined package: campuslostfound (Satisfies CO2)"],
-        ["User Interfaces", "1. Primary Menu-Driven Console Application (java.util.Scanner)\\n2. Optional Desktop GUI (Java Swing with classic ActionListener anonymous classes)"],
-        ["Collections Framework", "java.util.ArrayList, java.util.HashMap, java.util.HashSet, java.util.Collections.sort(), java.lang.Comparable"],
-        ["Multithreading & Concurrency", "java.lang.Thread, java.lang.Runnable, synchronized blocks, Thread.sleep()"],
-        ["File Input / Output", "java.io.BufferedReader, BufferedWriter, FileReader, FileWriter, PrintWriter"],
+    add_table(["Component", "Technology / Tool Used"], [
+        ["Programming Language", "Java Standard Edition (JDK 8 or later)"],
+        ["Package", "User-defined package: campuslostfound (Satisfies CO2)"],
+        ["User Interface", "1. Menu-Driven Console Application (java.util.Scanner)\n2. Desktop GUI (Java Swing with classic ActionListener inner classes)"],
+        ["Collections", "ArrayList (inventory lists), HashMap (fast ID lookup), HashSet (unique categories)"],
+        ["Multithreading", "Thread class, Runnable, synchronized block, Thread.sleep()"],
+        ["File Handling", "BufferedReader, BufferedWriter, FileReader, FileWriter, PrintWriter"],
         ["Exception Handling", "Custom checked exceptions: InvalidItemException, ItemNotFoundException"]
-    ]
-    add_custom_table([Inches(2.5), Inches(4.0)], tbl_tools_headers, tbl_tools_data)
+    ])
 
-    add_heading2("5.3 Out-of-Syllabus Concepts Removed for Academic Submission")
-    add_p("To guarantee strict alignment with the CB2206L syllabus and prevent examination penalties, all non-syllabus concepts present in the previous iteration were completely excised and replaced with syllabus-standard Core Java constructs:")
+    add_heading2("5.3 Out-of-Syllabus Concepts Replaced with Simple Java")
+    add_table(["Out-of-Syllabus Concept", "Reason for Removal", "Simple Syllabus-Compliant Replacement"], [
+        ["java.time.LocalDate, ChronoUnit", "Modern Java 8 Date API is not in Core Java syllabus.", "Standard String format (YYYY-MM-DD) validated using split('-') and Integer.parseInt()."],
+        ["Java 8 Lambda Expressions (() -> ...)", "Functional programming is outside syllabus scope.", "Standard Scanner menu flow and classic ActionListener inner classes."],
+        ["Java 8 Stream API & Method References", "Streams are outside the Core Java syllabus.", "Standard for-loops and Collections.sort() with Comparable."],
+        ["Complex Regex Patterns", "Regex engines are not part of Unit II String processing.", "Standard String methods: length(), charAt(), Character.isDigit(), indexOf(), split(' ')."],
+        ["Complex NLP Stop-Words & Token Parsing", "Too complicated for 2nd-year Core Java.", "Simple String split(' ') and contains() for keyword matching."]
+    ])
 
-    tbl_removed_headers = ["Out-of-Syllabus Concept", "Reason for Removal", "Syllabus-Compliant Replacement"]
-    tbl_removed_data = [
-        ["java.time.LocalDate, ChronoUnit", "Java 8 Modern Date/Time API is outside Unit I/II syllabus scope.", "Standard String format (YYYY-MM-DD) validated using String.split() and Integer.parseInt()."],
-        ["Java 8 Lambda Expressions (() -> ...)", "Functional programming constructs not covered in Core Java syllabus.", "Standard procedural console menu flow and classic ActionListener anonymous inner classes."],
-        ["Java 8 Stream API & Method References (Item::getDate)", "Streams and functional interfaces are advanced topics outside syllabus.", "Traditional enhanced for-loops and Collections.sort() using Comparable<MatchResult>."],
-        ["Complex Regex Patterns (\\d{10}, [\\w.+-]+...)", "Regex engines are not part of Unit II String processing.", "Standard String methods: length(), charAt(), Character.isDigit(), indexOf(), lastIndexOf()."],
-        ["UIManager Nimbus Look-and-Feel Loops", "Non-standard UI reflection loops that fail on diverse platforms.", "Clean standard Swing components without external theme hacks."]
-    ]
-    add_custom_table([Inches(2.1), Inches(2.2), Inches(2.2)], tbl_removed_headers, tbl_removed_data)
-
-    # Section 6: Implementation
+    # Section 6
     add_heading1("6. Implementation")
-    add_heading2("6.1 Layered Architecture")
-    add_p("The project is structured under the package campuslostfound following an enterprise three-tier separation of concerns:")
-    add_bullet("Presentation Layer: Main.java provides the interactive menu-driven console interface, and MainFrame.java provides the optional Swing desktop window.", bold_prefix="1. Presentation Layer: ")
-    add_bullet("Business Logic & Multithreading Layer: ItemManager.java manages in-memory collections, search filters, and status transitions. AutoMatchThread.java executes concurrent background matching with synchronization.", bold_prefix="2. Service Layer: ")
-    add_bullet("Domain Model & Interface Layer: Item.java (abstract), LostItem.java, FoundItem.java, Storable.java, Matchable.java, and MatchResult.java represent domain data and contracts.", bold_prefix="3. Model Layer: ")
-    add_bullet("Data Persistence Layer: FileManager.java handles low-level file I/O operations and report exporting.", bold_prefix="4. Persistence Layer: ")
-    add_bullet("Exception Handling Layer: InvalidItemException.java and ItemNotFoundException.java encapsulate application error states.", bold_prefix="5. Exception Layer: ")
+    add_heading2("6.1 Class Design and Responsibilities")
+    add_table(["Class / Interface", "Type", "Responsibility & Syllabus Mapping"], [
+        ["Item", "Abstract Class", "Base class with encapsulated fields, abstract methods, overloaded displayDetails(), and validation (CO2, CO3)."],
+        ["LostItem", "Subclass (extends Item)", "Represents lost items; implements Matchable with simple String matching (CO2, CO3)."],
+        ["FoundItem", "Subclass (extends Item)", "Represents found items; overrides abstract methods (CO2)."],
+        ["Storable", "Interface", "Defines toFileString() for file persistence (CO2)."],
+        ["Matchable", "Interface", "Defines MATCH_THRESHOLD = 50 and calculateMatchScore(Item) (CO2)."],
+        ["MatchResult", "Comparable Class", "Holds a matched pair and score; implements Comparable for sorting (CO4)."],
+        ["ItemManager", "Controller Class", "Manages ArrayList, HashMap, and HashSet; provides overloaded search() and synchronized methods (CO2, CO4)."],
+        ["AutoMatchThread", "Thread Class", "Extends Thread; implements run() with synchronized block to scan and export reports in background (CO4, Exp 5)."],
+        ["FileManager", "File Handling Class", "Reads and writes records using BufferedReader, BufferedWriter, and PrintWriter."],
+        ["InvalidItemException", "Custom Exception", "User-defined checked exception thrown when user input is invalid (CO3)."],
+        ["ItemNotFoundException", "Custom Exception", "User-defined checked exception thrown when an item ID does not exist (CO3)."],
+        ["Main", "Console UI Class", "Entry point providing an interactive 10-option menu-driven console interface (CO1-CO4)."],
+        ["MainFrame", "Swing GUI Class", "Desktop GUI window with tabs for reporting, viewing, and matching."]
+    ])
 
-    add_heading2("6.2 Class Design and Responsibilities")
-    tbl_classes_headers = ["Class / Interface", "Syllabus Category", "Role & Academic Responsibility"]
-    tbl_classes_data = [
-        ["Item", "Abstract Class (CO2, CO3)", "Root entity encapsulating item metadata; defines abstract methods getType(), getPersonRole(), displayDetails(); provides overloaded displayDetails(boolean); validates inputs."],
-        ["LostItem", "Subclass (CO2, CO4)", "Extends Item; implements Matchable; contains scoring logic calculateMatchScore(Item); overrides polymorphic methods."],
-        ["FoundItem", "Subclass (CO2)", "Extends Item; represents found articles; overrides polymorphic methods."],
-        ["Storable", "Interface (CO2)", "Defines abstraction for persistence: String toFileString()."],
-        ["Matchable", "Interface (CO2)", "Defines interface constant MATCH_THRESHOLD = 50 and method calculateMatchScore(Item)."],
-        ["MatchResult", "Comparable Model (CO4)", "Encapsulates a matched pair; implements Comparable<MatchResult> for descending sort by score."],
-        ["ItemManager", "Controller (CO2, CO4)", "Owns collections (ArrayList, HashMap, HashSet); provides overloaded search() and findMatchesFor(); synchronizes data operations."],
-        ["AutoMatchThread", "Multithreading (CO4, Exp 5)", "Extends Thread; implements run(); synchronizes on ItemManager to scan inventory and export reports asynchronously."],
-        ["FileManager", "File I/O (Unit II)", "Encapsulates reading/writing via BufferedReader, BufferedWriter, and PrintWriter."],
-        ["InvalidItemException", "Custom Exception (CO3)", "User-defined checked exception thrown when input validation fails."],
-        ["ItemNotFoundException", "Custom Exception (CO3)", "User-defined checked exception thrown when an item ID cannot be located."],
-        ["Main", "Console UI (CO1-CO4)", "Primary application entry point offering interactive menu-driven console options (0 to 10)."],
-        ["MainFrame", "Desktop GUI (Optional)", "Simplified Swing GUI utilizing classic ActionListener inner classes."]
-    ]
-    add_custom_table([Inches(1.8), Inches(1.8), Inches(2.9)], tbl_classes_headers, tbl_classes_data)
-
-    add_heading2("6.3 Direct Mapping to CB2206L Course Syllabus")
-    tbl_syl_headers = ["Syllabus Unit / CO", "Required Concept", "Implementation in CampusLostFound Project"]
-    tbl_syl_data = [
-        ["Unit I / CO2", "User-Defined Packages", "All classes declare 'package campuslostfound;' and reside in folder campuslostfound."],
-        ["Unit I / CO2", "Classes, Objects & Constructors", "Item, LostItem, FoundItem, ItemManager; parameterized constructors with super() chaining."],
-        ["Unit I / CO2", "Inheritance & Access Modifiers", "LostItem and FoundItem extend Item; private instance variables with public getters and protected utilities."],
-        ["Unit I / CO2", "Abstraction & Interfaces", "Abstract class Item with abstract methods; Storable and Matchable interfaces with public static final constants."],
-        ["Unit I / CO2", "Polymorphism (Overloading & Overriding)", "Overloading: search(keyword) vs search(keyword, category); displayDetails() vs displayDetails(boolean); findMatchesFor(LostItem) vs findMatchesFor(FoundItem).\\nOverriding: getType(), getPersonRole(), displayDetails(), calculateMatchScore(), toString(), toFileString()."],
-        ["Unit II / CO3", "String Processing", "String methods length(), trim(), toLowerCase(), split(), indexOf(), lastIndexOf(), substring(), replace(), equals(), contains(). Contact and date validation."],
-        ["Unit II / CO3", "Exception Handling", "User-defined checked exceptions (InvalidItemException, ItemNotFoundException); try-catch-finally, throw, throws."],
-        ["Unit II / CO4", "Collections Framework", "ArrayList<LostItem>, ArrayList<FoundItem>, ArrayList<MatchResult>; HashMap<String, Item> for fast ID lookup; HashSet<String> for stop words & categories; Collections.sort()."],
-        ["Unit II / CO4 / Exp 5", "Multithreading & Synchronization", "AutoMatchThread extends Thread, overrides run(); demonstrates synchronized block on ItemManager; uses Thread.sleep() and Thread.currentThread()."]
-    ]
-    add_custom_table([Inches(1.5), Inches(2.0), Inches(3.0)], tbl_syl_headers, tbl_syl_data)
-
-    add_heading2("6.4 Key Code Excerpts Demonstrating Syllabus Requirements")
-
-    add_heading3("(a) User-Defined Package, Abstraction, and Encapsulation (Item.java)")
-    add_code_box(
-"""package campuslostfound;
-
-import java.util.HashSet;
-import java.util.Set;
-
-public abstract class Item implements Storable {
-    public static final String STATUS_OPEN = "OPEN";
-    public static final String STATUS_RETURNED = "RETURNED";
-
-    // Encapsulation: private member fields
-    private String id;
-    private String name;
-    private String category;
-    private String description;
-    private String location;
-    private String date;            // YYYY-MM-DD
-    private String personName;
-    private String personContact;
-    private String status;
-
-    public Item(String id, String name, String category, String description,
-                String location, String date, String personName,
-                String personContact, String status) throws InvalidItemException {
-        this.id = id;
-        setName(name);
-        setCategory(category);
-        setDescription(description);
-        setLocation(location);
-        setDate(date);
-        setPersonName(personName);
-        setPersonContact(personContact);
-        setStatus(status);
+    add_heading2("6.2 Key Code Excerpt: Simplified Java Matching (LostItem.java)")
+    add_p("The matching method uses only standard String methods (equalsIgnoreCase, toLowerCase, split, and contains):")
+    add_code("""@Override
+public int calculateMatchScore(Item other) {
+    if (!(other instanceof FoundItem)) {
+        return 0;
     }
 
-    // Abstract methods demonstrating Abstraction
-    public abstract String getType();
-    public abstract String getPersonRole();
-    public abstract void displayDetails();
-}"""
-    )
+    int score = 0;
 
-    add_heading3("(b) Method Overloading (Item.java & ItemManager.java)")
-    add_code_box(
-"""// 1. In Item.java: Overloaded displayDetails
-public void displayDetails(boolean showContact) {
-    displayDetails();
-    if (showContact) {
-        System.out.println("   Contact: " + personContact);
+    // 1. Category Match (40 points) using equalsIgnoreCase()
+    boolean sameCategory = getCategory().equalsIgnoreCase(other.getCategory());
+    if (sameCategory) {
+        score += 40;
     }
-}
 
-// 2. In ItemManager.java: Overloaded search methods
-public List<Item> search(String keyword) {
-    return search(keyword, "All");
-}
+    // 2. Name Word Match (30 points) using split(" ") and contains()
+    String myName = getName().toLowerCase();
+    String otherText = (other.getName() + " " + other.getDescription()).toLowerCase();
 
-public List<Item> search(String keyword, String category) {
-    String key = (keyword == null) ? "" : keyword.trim().toLowerCase();
-    List<Item> results = new ArrayList<>();
-    List<Item> all = getAllItems();
-    for (int i = 0; i < all.size(); i++) {
-        Item item = all.get(i);
-        boolean catMatch = category.equalsIgnoreCase("All") || item.getCategory().equalsIgnoreCase(category);
-        String text = (item.getName() + " " + item.getDescription() + " " + item.getLocation()).toLowerCase();
-        if (catMatch && (key.length() == 0 || text.contains(key))) {
-            results.add(item);
-        }
-    }
-    return results;
-}"""
-    )
-
-    add_heading3("(c) String Processing and Custom Exception Validation (Item.java)")
-    add_code_box(
-"""// Validating Contact via String methods (length, charAt, Character.isDigit, indexOf)
-public final void setPersonContact(String contact) throws InvalidItemException {
-    String c = validateNonEmpty(contact, "Contact");
-    boolean isPhone = false;
-    if (c.length() == 10) {
-        isPhone = true;
-        for (int i = 0; i < c.length(); i++) {
-            if (!Character.isDigit(c.charAt(i))) {
-                isPhone = false;
+    boolean nameMatched = false;
+    if (otherText.contains(myName) || myName.contains(other.getName().toLowerCase())) {
+        nameMatched = true;
+    } else {
+        String[] words = myName.split(" ");
+        for (int i = 0; i < words.length; i++) {
+            String word = words[i].trim();
+            if (word.length() >= 3 && otherText.contains(word)) {
+                nameMatched = true;
                 break;
             }
         }
     }
-    boolean isEmail = false;
-    int atIndex = c.indexOf('@');
-    int dotIndex = c.lastIndexOf('.');
-    if (atIndex > 0 && dotIndex > atIndex + 1 && dotIndex < c.length() - 1) {
-        isEmail = true;
-    }
-    if (!isPhone && !isEmail) {
-        throw new InvalidItemException("Contact must be a 10-digit phone number or a valid email address.");
-    }
-    this.personContact = c;
-}
 
-// Validating Date format using String.split() and Integer.parseInt()
-public final void setDate(String dateStr) throws InvalidItemException {
-    String cleanDate = validateNonEmpty(dateStr, "Date");
-    String[] parts = cleanDate.split("-");
-    boolean valid = false;
-    if (parts.length == 3) {
-        try {
-            int year = Integer.parseInt(parts[0].trim());
-            int month = Integer.parseInt(parts[1].trim());
-            int day = Integer.parseInt(parts[2].trim());
-            if (year >= 2000 && year <= 2099 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-                valid = true;
-            }
-        } catch (NumberFormatException e) { valid = false; }
+    if (nameMatched) {
+        score += 30;
     }
-    if (!valid) {
-        throw new InvalidItemException("Date must be in YYYY-MM-DD format (e.g., 2026-10-15).");
+
+    // 3. Location Match (up to 30 points)
+    String myLoc = getLocation().toLowerCase();
+    String otherLoc = other.getLocation().toLowerCase();
+    if (myLoc.equalsIgnoreCase(otherLoc)) {
+        score += 30; // Exact match
+    } else if (myLoc.contains(otherLoc) || otherLoc.contains(myLoc)) {
+        score += 20; // Partial match
     }
-    this.date = cleanDate;
-}"""
-    )
 
-    add_heading3("(d) Multithreading & Synchronization (AutoMatchThread.java)")
-    add_code_box(
-"""package campuslostfound;
+    // Safety rule: Must share at least one name word
+    if (!nameMatched) {
+        return 0;
+    }
 
-import java.io.IOException;
-import java.util.List;
+    return Math.min(score, 100);
+}""")
 
-public class AutoMatchThread extends Thread {
+    add_heading2("6.3 Key Code Excerpt: Multithreading & Synchronization (AutoMatchThread.java)")
+    add_p("Extends Thread, overrides run(), and uses a synchronized block on ItemManager:")
+    add_code("""public class AutoMatchThread extends Thread {
     private final ItemManager manager;
     private final FileManager fileManager;
 
@@ -569,171 +340,77 @@ public class AutoMatchThread extends Thread {
         System.out.println("\\n[" + getName() + "] Background thread started.");
         try {
             System.out.println("[" + getName() + "] Step 1: Scanning inventory...");
-            Thread.sleep(600); // Simulate background workload
+            Thread.sleep(600);
 
             List<MatchResult> matches;
-            // Thread Synchronization: synchronized block on shared ItemManager instance
+            // Thread synchronization on shared ItemManager instance
             synchronized (manager) {
-                System.out.println("[" + getName() + "] Step 2: Acquired lock on ItemManager. Computing matches...");
+                System.out.println("[" + getName() + "] Step 2: Acquired lock. Computing matches...");
                 matches = manager.findAllMatches();
             }
 
             Thread.sleep(400);
-            System.out.println("[" + getName() + "] Step 3: Identified " + matches.size() + " match(es).");
+            System.out.println("[" + getName() + "] Step 3: Found " + matches.size() + " match(es).");
             fileManager.exportMatchReport(matches, FileManager.REPORT_FILE);
-            System.out.println("[" + getName() + "] Step 4: Successfully saved background report to file.");
+            System.out.println("[" + getName() + "] Step 4: Saved report to: " + FileManager.REPORT_FILE);
         } catch (InterruptedException | IOException e) {
             System.err.println("[" + getName() + "] Error: " + e.getMessage());
         }
     }
-}"""
-    )
+}""")
 
-    add_heading3("(e) Custom Checked Exceptions (InvalidItemException.java & ItemNotFoundException.java)")
-    add_code_box(
-"""package campuslostfound;
-
-// Thrown during validation failure
-public class InvalidItemException extends Exception {
-    private static final long serialVersionUID = 1L;
-    public InvalidItemException(String message) {
-        super(message);
-    }
-}
-
-// Thrown when an item record ID is missing
-public class ItemNotFoundException extends Exception {
-    private static final long serialVersionUID = 1L;
-    public ItemNotFoundException(String id) {
-        super("Item with ID '" + id + "' was not found in the records.");
-    }
-}"""
-    )
-
-    add_heading2("6.5 How to Compile and Run the Project")
-    add_p("The project can be compiled and executed via terminal, Windows batch script, or any standard Java IDE:")
-    add_code_box(
-"""# 1. Compilation using standard Java compiler (from project root):
+    add_heading2("6.4 How to Compile and Run the Project")
+    add_code("""# 1. Compile all Java files from project root:
 javac campuslostfound/*.java
 
-# 2. Execution of the Menu-Driven Console Application:
+# 2. Run the interactive Console Menu application:
 java campuslostfound.Main
 
-# 3. Execution of the Graphical User Interface (GUI):
+# 3. (Optional) Run the Swing GUI directly:
 java campuslostfound.Main --gui
 
-# 4. Windows One-Click Execution:
-Double-click run.bat in the project root directory."""
-    )
+# 4. Or double-click 'run.bat' on Windows to compile and run automatically.""")
 
-    # Section 7: Results & Testing
+    # Section 7
     add_heading1("7. Results & Test Verification")
-    add_heading2("7.1 Interactive Console Interface")
-    add_p("When Main.java is executed, the user is presented with a structured text menu. The application executes all operations synchronously with immediate feedback:")
-    add_code_box(
-"""=============================================================
-   WELCOME TO CAMPUS LOST & FOUND MANAGEMENT SYSTEM
-   (CB2206L: Skill Development Lab-I Mini Project)
-=============================================================
+    add_heading2("7.1 Matching Results on Sample Data")
+    add_table(["Lost Item", "Found Item", "Score", "Matching Rationale"], [
+        ["L003: Casio Calculator (Exam Hall)", "F002: Calculator (Exam Hall)", "100%", "Category match (40), word 'calculator' match (30), exact location match (30)."],
+        ["L004: House Keys (Parking Area)", "F003: Keys (Parking Area)", "100%", "Category match (40), word 'keys' match (30), exact location match (30)."],
+        ["L006: Data Structures Book (Computer Lab)", "F005: Textbook (Computer Lab)", "100%", "Category match (40), word 'book' match in description (30), location match (30)."],
+        ["L001: Black Wallet (Library)", "F001: Wallet (Library 2nd Floor)", "90%", "Category match (40), word 'wallet' match (30), partial location match (20)."],
+        ["L002: Blue Water Bottle (Canteen)", "F004: Red Umbrella (Canteen)", "0% (No match)", "Zero words in common; correctly rejected by the safety rule."]
+    ])
 
--------------------------------------------------------------
-                    MAIN MENU OPTIONS
--------------------------------------------------------------
- 1. Report a Lost Item
- 2. Report a Found Item
- 3. View All Registered Items
- 4. Search Items (Demonstrates Method Overloading)
- 5. Find Matches (Lost vs Found)
- 6. Mark Item as Claimed / Returned
- 7. Delete an Item Record
- 8. View Categories & Statistics (Demonstrates HashSet & HashMap)
- 9. Run Background Auto-Match Worker (Demonstrates Multithreading)
- 10. Launch Graphical User Interface (Swing GUI)
- 0. Exit System
--------------------------------------------------------------
-Enter your choice (0 - 10): 8
+    add_heading2("7.2 Test Cases Suite (14 Comprehensive Tests)")
+    add_table(["TC #", "Test Case Description", "Input / Action", "Expected Result", "Status"], [
+        ["TC-01", "Register Lost Item", "Casio Calc, Electronics, 2026-10-15, 9876543210", "Item assigned ID L007, saved to file.", "Pass"],
+        ["TC-02", "Immediate Match Alert", "Submit report matching existing found item", "System immediately alerts user of potential match.", "Pass"],
+        ["TC-03", "Empty Name Validation", "Submit empty item name", "InvalidItemException: 'Item name cannot be empty.'", "Pass"],
+        ["TC-04", "Invalid Date Validation", "Enter date '15/10/2026'", "InvalidItemException: 'Date must be in YYYY-MM-DD format.'", "Pass"],
+        ["TC-05", "Invalid Contact Validation", "Enter phone '12345'", "InvalidItemException: 'Contact must be 10 digits or email.'", "Pass"],
+        ["TC-06", "Overloaded Search (Keyword)", "search('wallet')", "Returns items containing 'wallet' in details.", "Pass"],
+        ["TC-07", "Overloaded Search (Cat Filter)", "search('Keys', 'Keys')", "Returns items matching keyword and category filter.", "Pass"],
+        ["TC-08", "HashMap ID Lookup", "getItemById('L001')", "Returns item L001 in O(1) time.", "Pass"],
+        ["TC-09", "HashSet Categories Listing", "Select Menu Option 8", "Displays set of unique categories without duplicates.", "Pass"],
+        ["TC-10", "Multithreaded Sync", "Select Menu Option 9", "AutoMatchThread runs concurrently and exports report.", "Pass"],
+        ["TC-11", "Confirm Return", "Confirm match L003 <-> F002", "Both items marked RETURNED and saved to file.", "Pass"],
+        ["TC-12", "Delete Record", "Delete item 'L005'", "Item removed from ArrayList, HashMap, and file.", "Pass"],
+        ["TC-13", "File Persistence", "Restart application", "All records successfully reloaded from text files.", "Pass"],
+        ["TC-14", "Missing ID Exception", "Delete unknown ID 'L999'", "ItemNotFoundException: 'Item L999 was not found.'", "Pass"]
+    ])
 
->>> SYSTEM STATISTICS & COLLECTIONS OVERVIEW <<<
-Total Registered Lost Items  : 6
-Total Registered Found Items : 5
-Total Returned / Claimed     : 0
-
-Unique Item Categories in Inventory (Stored in HashSet):
-   * Clothing
-   * Wallet
-   * Keys
-   * Electronics
-   * Books
-   * Other"""
-    )
-
-    add_heading2("7.2 Multithreaded Background Synchronization Execution Output")
-    add_p("Selecting Option 9 in the console menu starts AutoMatchThread concurrently, demonstrating thread execution and synchronized locking:")
-    add_code_box(
-"""Enter your choice (0 - 10): 9
-
->>> LAUNCHING MULTITHREADED BACKGROUND WORKER <<<
-Creating and starting AutoMatchThread (extends Thread)...
-
-[AutoMatchWorkerThread] Background thread started.
-[AutoMatchWorkerThread] Step 1: Scanning lost and found item collections...
-[AutoMatchWorkerThread] Step 2: Acquired lock on ItemManager. Computing match scores...
-[AutoMatchWorkerThread] Step 3: Found 5 potential match(es).
-[AutoMatchWorkerThread] Step 4: Successfully saved background report to: data\\match_report.txt
-[AutoMatchWorkerThread] Background synchronization completed successfully!"""
-    )
-
-    add_heading2("7.3 Matching Results Summary for Baseline Data")
-    tbl_match_headers = ["Lost Report", "Found Report", "Match Score", "Matching Rationale"]
-    tbl_match_data = [
-        ["L003: Casio Calculator (Exam Hall)", "F002: Calculator (Exam Hall)", "100%", "Category equal (+40), shared keywords 'calculator' (+30), location match (+30)."],
-        ["L004: House Keys (Parking Area)", "F003: Keys (Parking Area)", "100%", "Category equal (+40), shared keyword 'keys' (+30), location match (+30)."],
-        ["L006: Data Structures Book (Computer Lab)", "F005: Textbook (Computer Lab)", "100%", "Category equal (+40), shared keyword 'book' (+30), location match (+30)."],
-        ["L001: Black Wallet (Library)", "F001: Wallet (Library 2nd Floor)", "90%", "Category equal (+40), keyword 'wallet' (+30), location substring match (+20)."],
-        ["L002: Blue Water Bottle (Canteen)", "F004: Red Umbrella (Canteen)", "0% (No match)", "Zero shared keywords and different items; correctly rejected by safety rule."]
-    ]
-    add_custom_table([Inches(1.8), Inches(1.8), Inches(1.0), Inches(1.9)], tbl_match_headers, tbl_match_data)
-
-    add_heading2("7.4 Comprehensive Test Suite (14 Test Cases)")
-    tbl_tests_headers = ["TC #", "Test Description", "Input / Trigger Action", "Expected Behavior", "Status"]
-    tbl_tests_data = [
-        ["TC-01", "Valid Lost Report Registration", "Name: Casio Calc, Category: Electronics, Date: 2026-10-15, Phone: 9876543210", "Item assigned ID L007, saved to file, success message displayed.", "Pass"],
-        ["TC-02", "Immediate Match Alert", "Report item with attributes matching an existing found item.", "Immediate match warning displayed with confidence score.", "Pass"],
-        ["TC-03", "Validation: Blank Name", "Submit form with empty item name.", "InvalidItemException: 'Item name cannot be empty.'", "Pass"],
-        ["TC-04", "Validation: Invalid Date Format", "Date entered as '15/10/2026' or '2026.10.15'.", "InvalidItemException: 'Date must be in YYYY-MM-DD format'.", "Pass"],
-        ["TC-05", "Validation: Invalid Contact", "Contact entered as '12345' or 'student@@college'.", "InvalidItemException: 'Contact must be a 10-digit phone or valid email'.", "Pass"],
-        ["TC-06", "Overloaded Search (Keyword)", "Search 'wallet' via search(keyword).", "Returns L001 and F001 matching wallet in name or description.", "Pass"],
-        ["TC-07", "Overloaded Search (Keyword + Cat)", "Search keyword 'Keys' and category 'Keys'.", "Returns L004 and F003 matching both constraints.", "Pass"],
-        ["TC-08", "Collections ID Lookup (HashMap)", "Query item by ID 'L001'.", "Instant O(1) retrieval from itemMap; details displayed.", "Pass"],
-        ["TC-09", "HashSet Categories Listing", "Select Option 8 (Categories & Stats).", "Displays unique categories set without duplicates.", "Pass"],
-        ["TC-10", "Multithreaded Background Sync", "Select Option 9 to trigger AutoMatchThread.", "Thread executes in background, acquires lock, exports report.", "Pass"],
-        ["TC-11", "Confirm Return / Claim", "Mark match L003 <-> F002 as claimed.", "Both items status updated to RETURNED; persisted to text file.", "Pass"],
-        ["TC-12", "Record Deletion", "Delete record with ID 'L005'.", "Record removed from ArrayList and HashMap; file updated.", "Pass"],
-        ["TC-13", "File Persistence Reload", "Restart application and view all items.", "All records restored from lost_items.txt and found_items.txt.", "Pass"],
-        ["TC-14", "Missing ID Exception", "Attempt to delete or return non-existent ID 'L999'.", "ItemNotFoundException: 'Item with ID L999 was not found'.", "Pass"]
-    ]
-    add_custom_table([Inches(0.6), Inches(1.6), Inches(1.7), Inches(2.1), Inches(0.5)], tbl_tests_headers, tbl_tests_data)
-
-    # Section 8: Conclusion
+    # Section 8
     add_heading1("8. Conclusion")
-    add_p("The Campus Lost & Found Management System successfully satisfies all academic and practical requirements specified in the CB2206L: Skill Development Lab-I syllabus. The project demonstrates a well-engineered balance between object-oriented architectural principles, robust validation, collections data structures, and multithreaded synchronization:")
-    add_bullet("Academic Fulfillment: Fully implements every syllabus requirement of CO2 (OOP, Inheritance, Packages, Access Modifiers, Abstraction, Polymorphism), CO3 (String Processing, Checked Exceptions), and CO4 (Collections Framework, Multithreading, Thread Synchronization).", bold_prefix="1. Curriculum Mastery: ")
-    add_bullet("Strict Syllabus Alignment: Successfully eliminated all out-of-syllabus Java 8+ features (LocalDate, ChronoUnit, Streams, Lambdas, complex regex) to produce clean, reproducible Core Java code suitable for evaluation and viva.", bold_prefix="2. Syllabus Purity: ")
-    add_bullet("Dual User Interface: Delivers both an interactive menu-driven console interface for transparent terminal evaluation and a clean desktop GUI.", bold_prefix="3. User Versatility: ")
-    add_bullet("Robust Fault Tolerance: Comprehensive validation ensures the application cannot be placed into an invalid state, with all errors handled gracefully via custom checked exceptions.", bold_prefix="4. Robustness: ")
-
-    add_heading2("8.1 Project Limitations")
-    add_bullet("Flat file persistence is ideal for lab submission but lacks ACID transactional guarantees for thousands of concurrent users.", bold_prefix="File I/O Scalability: ")
-    add_bullet("Keyword matching operates on exact token sets; lexical variations (e.g., 'earphones' vs 'headphones') are not automatically resolved without a synonym dictionary.", bold_prefix="Semantic Lexical Gap: ")
-
-    add_heading2("8.2 Future Scope")
-    add_bullet("Integrate relational database storage (MySQL/PostgreSQL) using Java Database Connectivity (JDBC) when transitioning to advanced semesters.", bold_prefix="Database Integration: ")
-    add_bullet("Implement role-based authentication (RBAC) with secure student and security-desk login credentials.", bold_prefix="Authentication: ")
-    add_bullet("Incorporate automated email notifications via JavaMail API upon match identification.", bold_prefix="Automated Alerts: ")
+    add_p("The Campus Lost & Found Management System successfully satisfies all requirements of the CB2206L syllabus:")
+    add_bullet("Fully covers OOP (CO2), String Processing & Exceptions (CO3), Collections & Multithreading (CO4).", bold_prefix="1. Syllabus Compliance: ")
+    add_bullet("Uses simple, understandable Java concepts throughout, making the project easy to explain in lab exams and viva.", bold_prefix="2. Simplicity & Clarity: ")
+    add_bullet("Provides dual interfaces: a transparent Console Menu for evaluation and a Swing GUI for visual interaction.", bold_prefix="3. Usability: ")
+    add_bullet("Guarantees data persistence through text file handling with zero third-party dependencies.", bold_prefix="4. Independence: ")
 
     # Appendix: Source Code
     add_heading1("Appendix: Complete Source Code")
-    add_p("The complete, verified source code for all 13 Java classes under package campuslostfound is included below:")
+    add_p("The complete source code for all 13 Java classes under package campuslostfound is given below:")
 
     code_files = [
         ("Item.java", "campuslostfound/Item.java"),
@@ -751,18 +428,19 @@ Creating and starting AutoMatchThread (extends Thread)...
         ("MainFrame.java", "campuslostfound/MainFrame.java")
     ]
 
-    for fname, fpath in code_files:
-        full_path = os.path.join("c:\\Users\\yashr\\Downloads\\CampusLostFound", fpath)
+    base_dir = r"C:\Users\yashr\OneDrive\Documents\Academic\SY\SEM-1\SDL\CampusLostFound"
+    for fname, rel_path in code_files:
+        full_path = os.path.join(base_dir, rel_path)
         if os.path.exists(full_path):
             with open(full_path, "r", encoding="utf-8") as f:
-                content = f.read()
+                code_text = f.read()
             add_heading2(f"Source Code: {fname} (package campuslostfound)")
-            add_code_box(content)
+            add_code(code_text)
 
-    # Save document
-    output_path = r"c:\Users\yashr\Downloads\CampusLostFound\Campus_Lost_Found_Mini_Project_Report.docx"
-    doc.save(output_path)
-    print(f"Report generated successfully at: {output_path}")
+    # Save Word document
+    output_docx = os.path.join(base_dir, "Campus_Lost_Found_Mini_Project_Report.docx")
+    doc.save(output_docx)
+    print(f"[SUCCESS] Word report created at: {output_docx}")
 
 if __name__ == "__main__":
-    create_report()
+    build_report()
