@@ -5,3 +5,4 @@ L004|House Keys|Keys|Keychain with red tag and two keys|Parking Area|2026-10-12|
 L005|Grey Hoodie|Clothing|Grey hoodie with university logo|Main Auditorium|2026-10-08|Kunal Shah|kunal.shah@example.com|OPEN
 L006|Data Structures Book|Books|Data Structures textbook by Tanenbaum|Computer Lab|2026-10-13|Sneha Pawar|9090909090|OPEN
 L007|Mobile Phone|Electronics|Color : Blue, Brand : Samsung|in front of the sangam restraunt|2026-10-16|Yashkumar Meshram|8830225214|OPEN
+L008|Mobile Phone|Wallet|Color : Blue|Near the college gate of JSPM|2026-10-17|Sarthak Jagtap|1234567890|OPEN
