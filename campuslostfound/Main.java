@@ -7,23 +7,12 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
-/**
- * Main application entry point for the Campus Lost & Found System.
- *
- * Demonstrates Syllabus Concepts:
- * - Fundamental Programming & Control Structures (Unit I, CO1): switch-case, while loops, methods
- * - Object-Oriented Programming (Unit I, CO2): Classes, Objects, Inheritance, Polymorphism, Packages
- * - String Processing & Exception Handling (Unit II, CO3): Validating user input, handling custom exceptions
- * - Collections Framework (Unit II, CO4): ArrayList, HashMap, HashSet iteration and usage
- * - Multithreading & Synchronization (Unit II, CO4, Exp 5): Starting background AutoMatchThread
- */
 public class Main {
 
     private static final FileManager fileManager = new FileManager();
     private static ItemManager itemManager;
 
     public static void main(String[] args) {
-        // Initialize ItemManager and load saved records
         try {
             itemManager = new ItemManager(fileManager);
         } catch (IOException e) {
@@ -31,7 +20,7 @@ public class Main {
             return;
         }
 
-        // If user runs with "--gui" flag, launch GUI directly
+        
         if (args.length > 0 && args[0].equalsIgnoreCase("--gui")) {
             launchGUI();
             return;
@@ -202,7 +191,7 @@ public class Main {
             List<MatchResult> matches = itemManager.findMatchesFor(found);
             if (!matches.isEmpty()) {
                 System.out.println("[MATCH ALERT] " + matches.size() + " potential matching lost item(s) found!");
-                for (int i = 0; i < matches.size(); i++) {
+                for (int i = 0; i < matches.sizye(); i++) {
                     MatchResult m = matches.get(i);
                     System.out.println("   -> Match Score: " + m.getScore() + "% | Lost Item: "
                             + m.getLostItem().getName() + " [ID: " + m.getLostItem().getId() + "] Owner: "

@@ -1,9 +1,3 @@
-"""
-Simple Report Generator for Campus Lost & Found System
-Uses standard python-docx library to create the project report document (.docx).
-Clean, readable, and easy to understand without any complex XML manipulation.
-"""
-
 import os
 import docx
 from docx.shared import Inches, Pt, RGBColor

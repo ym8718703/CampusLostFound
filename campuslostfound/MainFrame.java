@@ -28,14 +28,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Simplified Desktop Graphical User Interface (GUI).
- *
- * Demonstrates:
- * - Window and Component Layout (JFrame, JPanel, JTable, JTabbedPane)
- * - Event Handling using classic ActionListener anonymous inner classes (Standard Core Java)
- * - Interaction with business logic layer (ItemManager)
- */
+
 public class MainFrame extends JFrame {
 
     private static final String[] CATEGORIES = {
